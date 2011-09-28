@@ -1,18 +1,127 @@
-
 var Oshi = {
+    Piece: function() {
+        this.status = null;
+        this.power = null;
+        this.color = null;
+        this.position = {
+            x: null,
+            y: null
+        };
+        this.draw = function() {
+            Oshi.piece.draw(this.color, this.position.x, this.position.y);
+        };
+    },
+    Player: function() {
+        this.status = null;
+        this.color = null;
+        this.id = null;
+        this.position = null;
+    },
     init: function() {
-        this.canvas.init();
-        this.canvas.clear();
-        this.canvas.draw_board();
+        try{
+            this.canvas.init();
+            this.canvas.clear();
+            this.canvas.draw_board();
+            
+            this.debug.dummy_join();
+            
+            this.game.pieces.generate();
+            this.game.pieces.setup();
+        } catch(e) {
+            $('#errors ul').append($('<li></li>').text(e));
+        }
+    },
+    debug: {
+        dummy_join: function() {
+            var player_one = new Oshi.Player();
+            player_one.color = 'red';
+            player_one.position = 'top';
+            player_one.id = 1;
+            
+            var player_two = new Oshi.Player();
+            player_two.color = 'yellow';
+            player_one.position = 'bottom';
+            player_two.id = 2;
+            
+            Oshi.game.players.push(player_one);
+            Oshi.game.players.push(player_two);
+        }
+    },
+    player: {
+        positions: {
+            top: 'top',
+            bottom: 'bottom'
+        }
+    }, 
+    game: {
+        available_statuses: ['in_progress', 'open', 'closed', 'dropped'],
+        status: null,
+        turn_num: null,
+        turn: null,
+        start_timestamp: null,
+        end_timestamp: null,
+        players: [],
+        min_players: 2,
+        max_players: 2,
+        pieces: {
+            in_game: [],
+            generate: function() {
+                
+            },
+            setup: function() {
+                if (this.in_game.length) {
+                    throw Oshi.exception_map.pieces_set;
+                }
+                if (Oshi.game.players.length < Oshi.game.min_players) {
+                    throw sprintf(Oshi.exception_map.not_enough_players, Oshi.game.min_players);
+                }
+                for (var player in Oshi.game.players) {
+                    for (var piece_setup in Oshi.piece.setup[player.position]) {
+                        var piece = Piece();
+                        piece.status = piece.available_statuses.alive;
+                        piece.power = piece_setup.power;
+                        piece.color = player.color;
+                        piece.position.x = piece_setup.x;
+                        piece.position.y = piece_setup.y;
+                        piece.draw();
+                    }
+                }
+            }
+        }
     },
     piece: {
+        setup: {
+            top: [
+                {x: 0, y: 0, power: 1},
+                {x: Oshi.piece.width * 8, y: 0, power: 1},
+                {x: Oshi.piece.width * 2, y: Oshi.piece.height, power: 1},
+                {x: Oshi.piece.width * 3, y: Oshi.piece.height, power: 1},
+                {x: Oshi.piece.width * 4, y: Oshi.piece.height, power: 1},
+                {x: Oshi.piece.width * 5, y: Oshi.piece.height, power: 1},
+                {x: Oshi.piece.width * 6, y: Oshi.piece.height, power: 1},
+                {x: Oshi.piece.width * 4, y: Oshi.piece.height*2, power: 1}
+            ],
+            bottom: [
+                {x: 0, y: Oshi.canvas.canvas_height-Oshi.piece.height},
+                {x: Oshi.canvas.canvas_width - Oshi.piece.width, y: Oshi.canvas.canvas_height-Oshi.piece.height*1, power: 1},
+                {x: Oshi.piece.width * 2, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
+                {x: Oshi.piece.width * 3, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
+                {x: Oshi.piece.width * 4, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
+                {x: Oshi.piece.width * 5, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
+                {x: Oshi.piece.width * 6, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
+                {x: Oshi.piece.width * 4, y: Oshi.canvas.canvas_height-Oshi.piece.height*3, power: 1}
+            ]
+        },
+        available_statuses: {alive: 'alive', dead: 'dead'},
         width: 44.4,
         height: 44.4,
-        red_image: 'http://www.useful-free-stuff.com/Data/icons/simple-red-square-icon-symbols-shapes-full-set/simple-red-square-icon-symbols-shapes-shape-square-frame.png',
-        yellow_image: 'http://www.snowmobilestud.com/shop/store/20100910001/items/thumbnails/yellow-square-aluminum-backer.jpg',
+        images: {
+            red:   'http://bit.ly/nHsGEw',
+            yellow: 'http://bit.ly/q6mG1U'
+        },
         draw: function(color, x, y) {
             Oshi.canvas.canvas_el.drawImage({
-                source: this[color+'_image'],
+                source: this.images[color],
                 x: x + this.width / 2,
                 y: y + this.height / 2,
                 width: this.width - 2,
@@ -28,6 +137,13 @@ var Oshi = {
         init: function() {
             this.create();
             this.load_context();
+            this.load_events();
+        },
+        load_events: function() {
+            this.canvas_el.click(function(e) {
+                click_coords = Oshi.canvas.get_cursor_coords(e);
+                console.log(click_coords);
+            });
         },
         create: function() {
             this.canvas_el = $('<canvas></canvas>').attr('id', 'oshi_canvas');
@@ -61,34 +177,32 @@ var Oshi = {
                     x1: 0,  y1: y,
                     x2: this.canvas_width,  y2: y
                 });
+            }            
+        },
+        get_cursor_coords: function(e) {
+            var x;
+            var y;
+            if (e.pageX !== undefined && e.pageY !== undefined) {
+                x = e.pageX;
+                y = e.pageY;
             }
-            
-            Oshi.piece.draw('red', 0, 0);
-            Oshi.piece.draw('red', Oshi.piece.width * 8, 0);
-            
-            Oshi.piece.draw('red', Oshi.piece.width * 2, Oshi.piece.height*1);
-            Oshi.piece.draw('red', Oshi.piece.width * 3, Oshi.piece.height*1);
-            Oshi.piece.draw('red', Oshi.piece.width * 4, Oshi.piece.height*1);
-            Oshi.piece.draw('red', Oshi.piece.width * 5, Oshi.piece.height*1);
-            Oshi.piece.draw('red', Oshi.piece.width * 6, Oshi.piece.height*1);
-            
-            Oshi.piece.draw('red', Oshi.piece.width * 4, Oshi.piece.height*2);
-            
-            
-            Oshi.piece.draw('yellow', 0, this.canvas_height-Oshi.piece.height);
-            Oshi.piece.draw('yellow', this.canvas_width - Oshi.piece.width,  this.canvas_height-Oshi.piece.height*1);
-            
-            Oshi.piece.draw('yellow', Oshi.piece.width * 2, this.canvas_height-Oshi.piece.height*2);
-            Oshi.piece.draw('yellow', Oshi.piece.width * 3, this.canvas_height-Oshi.piece.height*2);
-            Oshi.piece.draw('yellow', Oshi.piece.width * 4, this.canvas_height-Oshi.piece.height*2);
-            Oshi.piece.draw('yellow', Oshi.piece.width * 5, this.canvas_height-Oshi.piece.height*2);
-            Oshi.piece.draw('yellow', Oshi.piece.width * 6, this.canvas_height-Oshi.piece.height*2);
-            
-            Oshi.piece.draw('yellow', Oshi.piece.width * 4, this.canvas_height-Oshi.piece.height*3);
+            else {
+                x = e.clientX + document.body.scrollLeft +
+                                document.documentElement.scrollLeft;
+                y = e.clientY + document.body.scrollTop +
+                                document.documentElement.scrollTop;
+            }
+            x -= this.canvas_el.offsetLeft;
+            y -= this.canvas_el.offsetTop;
+            return [x, y];
         }
+    },
+    exception_map: {
+       pieces_set: "the pieces are already set",
+       not_enough_players: "You need at least %d players"
     }
 };
 
 $(function(){
-   Oshi.init(); 
+   Oshi.init();
 });
