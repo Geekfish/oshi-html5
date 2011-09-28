@@ -62,7 +62,26 @@ var Oshi = {
         pieces: {
             in_game: [],
             generate: function() {
-                //test
+                Oshi.piece.setup.top = [
+                    {x: 0, y: 0, power: 1},
+                    {x: Oshi.piece.width * 8, y: 0, power: 1},
+                    {x: Oshi.piece.width * 2, y: Oshi.piece.height, power: 1},
+                    {x: Oshi.piece.width * 3, y: Oshi.piece.height, power: 1},
+                    {x: Oshi.piece.width * 4, y: Oshi.piece.height, power: 1},
+                    {x: Oshi.piece.width * 5, y: Oshi.piece.height, power: 1},
+                    {x: Oshi.piece.width * 6, y: Oshi.piece.height, power: 1},
+                    {x: Oshi.piece.width * 4, y: Oshi.piece.height*2, power: 1}
+                ];
+                Oshi.piece.setup.bottom = [
+                    {x: 0, y: Oshi.canvas.canvas_height-Oshi.piece.height, power: 1},
+                    {x: Oshi.canvas.canvas_width - Oshi.piece.width, y: Oshi.canvas.canvas_height-Oshi.piece.height, power: 1},
+                    {x: Oshi.piece.width * 2, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
+                    {x: Oshi.piece.width * 3, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
+                    {x: Oshi.piece.width * 4, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
+                    {x: Oshi.piece.width * 5, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
+                    {x: Oshi.piece.width * 6, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
+                    {x: Oshi.piece.width * 4, y: Oshi.canvas.canvas_height-Oshi.piece.height*3, power: 1}
+                ];
             },
             setup: function() {
                 var player, piece, piece_setup;
@@ -91,28 +110,7 @@ var Oshi = {
         }
     },
     piece: {
-        setup: {
-            top: [
-                {x: 0, y: 0, power: 1},
-                {x: Oshi.piece.width * 8, y: 0, power: 1},
-                {x: Oshi.piece.width * 2, y: Oshi.piece.height, power: 1},
-                {x: Oshi.piece.width * 3, y: Oshi.piece.height, power: 1},
-                {x: Oshi.piece.width * 4, y: Oshi.piece.height, power: 1},
-                {x: Oshi.piece.width * 5, y: Oshi.piece.height, power: 1},
-                {x: Oshi.piece.width * 6, y: Oshi.piece.height, power: 1},
-                {x: Oshi.piece.width * 4, y: Oshi.piece.height*2, power: 1}
-            ],
-            bottom: [
-                {x: 0, y: Oshi.canvas.canvas_height-Oshi.piece.height, power: 1},
-                {x: Oshi.canvas.canvas_width - Oshi.piece.width, y: Oshi.canvas.canvas_height-Oshi.piece.height, power: 1},
-                {x: Oshi.piece.width * 2, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
-                {x: Oshi.piece.width * 3, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
-                {x: Oshi.piece.width * 4, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
-                {x: Oshi.piece.width * 5, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
-                {x: Oshi.piece.width * 6, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
-                {x: Oshi.piece.width * 4, y: Oshi.canvas.canvas_height-Oshi.piece.height*3, power: 1}
-            ]
-        },
+        setup: {},
         available_statuses: {alive: 'alive', dead: 'dead'},
         width: 44.4,
         height: 44.4,
