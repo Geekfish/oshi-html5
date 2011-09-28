@@ -22,9 +22,7 @@ var Oshi = {
             this.canvas.init();
             this.canvas.clear();
             this.canvas.draw_board();
-            
             this.debug.dummy_join();
-            
             this.game.pieces.generate();
             this.game.pieces.setup();
         } catch(e) {
@@ -34,15 +32,13 @@ var Oshi = {
     debug: {
         dummy_join: function() {
             var player_one = new Oshi.Player();
+            var player_two = new Oshi.Player();
             player_one.color = 'red';
             player_one.position = 'top';
             player_one.id = 1;
-            
-            var player_two = new Oshi.Player();
             player_two.color = 'yellow';
             player_one.position = 'bottom';
             player_two.id = 2;
-            
             Oshi.game.players.push(player_one);
             Oshi.game.players.push(player_two);
         }
@@ -52,7 +48,7 @@ var Oshi = {
             top: 'top',
             bottom: 'bottom'
         }
-    }, 
+    },
     game: {
         available_statuses: ['in_progress', 'open', 'closed', 'dropped'],
         status: null,
@@ -66,24 +62,29 @@ var Oshi = {
         pieces: {
             in_game: [],
             generate: function() {
-                
+                //test
             },
             setup: function() {
+                var player, piece, piece_setup;
                 if (this.in_game.length) {
                     throw Oshi.exception_map.pieces_set;
                 }
                 if (Oshi.game.players.length < Oshi.game.min_players) {
                     throw sprintf(Oshi.exception_map.not_enough_players, Oshi.game.min_players);
                 }
-                for (var player in Oshi.game.players) {
-                    for (var piece_setup in Oshi.piece.setup[player.position]) {
-                        var piece = Piece();
-                        piece.status = piece.available_statuses.alive;
-                        piece.power = piece_setup.power;
-                        piece.color = player.color;
-                        piece.position.x = piece_setup.x;
-                        piece.position.y = piece_setup.y;
-                        piece.draw();
+                for (player in Oshi.game.players) {
+                    if (Oshi.game.players.hasOwnProperty(player)) {
+                        for (piece_setup in Oshi.piece.setup[player.position]) {
+                            if (Oshi.piece.setup[player.position].hasOwnProperty(piece_setup)) {
+                                piece = new Oshi.Piece();
+                                piece.status = piece.available_statuses.alive;
+                                piece.power = piece_setup.power;
+                                piece.color = player.color;
+                                piece.position.x = piece_setup.x;
+                                piece.position.y = piece_setup.y;
+                                piece.draw();
+                            }
+                        }
                     }
                 }
             }
@@ -102,8 +103,8 @@ var Oshi = {
                 {x: Oshi.piece.width * 4, y: Oshi.piece.height*2, power: 1}
             ],
             bottom: [
-                {x: 0, y: Oshi.canvas.canvas_height-Oshi.piece.height},
-                {x: Oshi.canvas.canvas_width - Oshi.piece.width, y: Oshi.canvas.canvas_height-Oshi.piece.height*1, power: 1},
+                {x: 0, y: Oshi.canvas.canvas_height-Oshi.piece.height, power: 1},
+                {x: Oshi.canvas.canvas_width - Oshi.piece.width, y: Oshi.canvas.canvas_height-Oshi.piece.height, power: 1},
                 {x: Oshi.piece.width * 2, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
                 {x: Oshi.piece.width * 3, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
                 {x: Oshi.piece.width * 4, y: Oshi.canvas.canvas_height-Oshi.piece.height*2, power: 1},
@@ -140,10 +141,11 @@ var Oshi = {
             this.load_events();
         },
         load_events: function() {
+            /*
             this.canvas_el.click(function(e) {
-                click_coords = Oshi.canvas.get_cursor_coords(e);
-                console.log(click_coords);
+                var click_coords = Oshi.canvas.get_cursor_coords(e);
             });
+            */
         },
         create: function() {
             this.canvas_el = $('<canvas></canvas>').attr('id', 'oshi_canvas');
@@ -158,7 +160,8 @@ var Oshi = {
             this.canvas_el.clearCanvas();
         },
         draw_board: function() {
-            for (var x = 0; x <= this.canvas_width; x += Oshi.piece.width) {
+            var x, y;
+            for (x = 0; x <= this.canvas_width; x += Oshi.piece.width) {
                 this.canvas_el.drawLine({
                     strokeStyle: "#000",
                     strokeWidth: 1,
@@ -168,7 +171,7 @@ var Oshi = {
                     x2: x,  y2: this.canvas_height
                 });
             }
-            for (var y = 0; y <= this.canvas_height; y += Oshi.piece.height) {
+            for (y = 0; y <= this.canvas_height; y += Oshi.piece.height) {
                 this.canvas_el.drawLine({
                     strokeStyle: "#000",
                     strokeWidth: 1,
@@ -177,11 +180,10 @@ var Oshi = {
                     x1: 0,  y1: y,
                     x2: this.canvas_width,  y2: y
                 });
-            }            
+            }
         },
         get_cursor_coords: function(e) {
-            var x;
-            var y;
+            var x, y;
             if (e.pageX !== undefined && e.pageY !== undefined) {
                 x = e.pageX;
                 y = e.pageY;
